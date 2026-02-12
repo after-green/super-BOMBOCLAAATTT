@@ -1,0 +1,162 @@
+import random
+
+# ---------- Player ----------
+class Player:
+    def __init__(self):
+        self.max_hp = 100
+        self.hp = 100
+        self.attack = 10
+        self.level = 1
+        self.xp = 0
+        self.gold = 20
+        self.potions = 2
+
+    def is_alive(self):
+        return self.hp > 0
+
+    def heal(self):
+        if self.potions > 0:
+            heal_amount = random.randint(15, 30)
+            self.hp = min(self.max_hp, self.hp + heal_amount)
+            self.potions -= 1
+            print(f"You used a potion and healed {heal_amount} HP!")
+        else:
+            print("No potions left!")
+
+    def gain_xp(self, amount):
+        self.xp += amount
+        print(f"You gained {amount} XP!")
+        if self.xp >= self.level * 20:
+            self.level_up()
+
+    def level_up(self):
+        self.level += 1
+        self.max_hp += 20
+        self.hp = self.max_hp
+        self.attack += 5
+        self.xp = 0
+        print(f"\n*** LEVEL UP! You are now level {self.level}! ***")
+        print("Stats increased and HP fully restored!\n")
+
+
+# ---------- Enemy ----------
+class Enemy:
+    def __init__(self, level):
+        self.name = random.choice(["Goblin", "Skeleton", "Orc", "Bandit"])
+        self.hp = random.randint(30, 50) + (level * 5)
+        self.attack = random.randint(5, 12) + (level * 2)
+
+    def is_alive(self):
+        return self.hp > 0
+
+
+# ---------- Combat ----------
+def combat(player):
+    enemy = Enemy(player.level)
+    print(f"\nA wild {enemy.name} appears!")
+
+    while enemy.is_alive() and player.is_alive():
+        print(f"\nYour HP: {player.hp}/{player.max_hp}")
+        print(f"{enemy.name} HP: {enemy.hp}")
+        print("1. Attack")
+        print("2. Use Potion")
+        print("3. Run")
+
+        choice = input("> ")
+
+        if choice == "1":
+            damage = random.randint(player.attack - 3, player.attack + 3)
+            enemy.hp -= damage
+            print(f"You dealt {damage} damage!")
+
+        elif choice == "2":
+            player.heal()
+
+        elif choice == "3":
+            if random.random() < 0.5:
+                print("You escaped!")
+                return
+            else:
+                print("You failed to escape!")
+
+        else:
+            print("Invalid choice.")
+            continue
+
+        if enemy.is_alive():
+            enemy_damage = random.randint(enemy.attack - 2, enemy.attack + 2)
+            player.hp -= enemy_damage
+            print(f"The {enemy.name} hits you for {enemy_damage} damage!")
+
+    if player.is_alive():
+        print(f"\nYou defeated the {enemy.name}!")
+        gold_reward = random.randint(10, 20)
+        xp_reward = random.randint(10, 20)
+        player.gold += gold_reward
+        print(f"You found {gold_reward} gold!")
+        player.gain_xp(xp_reward)
+    else:
+        print("\nYou were defeated...")
+
+
+# ---------- Shop ----------
+def shop(player):
+    print("\n--- Shop ---")
+    print(f"Gold: {player.gold}")
+    print("1. Buy Potion (10 gold)")
+    print("2. Increase Attack (30 gold)")
+    print("3. Leave")
+
+    choice = input("> ")
+
+    if choice == "1" and player.gold >= 10:
+        player.gold -= 10
+        player.potions += 1
+        print("Potion purchased!")
+    elif choice == "2" and player.gold >= 30:
+        player.gold -= 30
+        player.attack += 3
+        print("Attack increased!")
+    elif choice == "3":
+        return
+    else:
+        print("Not enough gold or invalid choice.")
+
+
+# ---------- Game Loop ----------
+def main():
+    player = Player()
+    print("Welcome to the Text RPG!")
+
+    while player.is_alive():
+        print("\nWhat would you like to do?")
+        print("1. Fight")
+        print("2. Shop")
+        print("3. View Stats")
+        print("4. Quit")
+
+        choice = input("> ")
+
+        if choice == "1":
+            combat(player)
+        elif choice == "2":
+            shop(player)
+        elif choice == "3":
+            print(f"\nLevel: {player.level}")
+            print(f"HP: {player.hp}/{player.max_hp}")
+            print(f"Attack: {player.attack}")
+            print(f"Gold: {player.gold}")
+            print(f"Potions: {player.potions}")
+            print(f"XP: {player.xp}")
+        elif choice == "4":
+            print("Goodbye!")
+            break
+        else:
+            print("Invalid choice.")
+
+    if not player.is_alive():
+        print("\nGame Over.")
+
+
+if __name__ == "__main__":
+    main()
